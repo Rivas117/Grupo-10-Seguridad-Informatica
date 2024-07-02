@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+  <link href="/public/css/styles.css" rel="stylesheet">
+  <title>Registro de Usuario</title>
+</head>
+<body>
+  <header class="bg-dark text-white text-center py-3">
+    <h4>Registro de Usuario</h4>
+  </header>
+
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-md-6">
+        <form id="registerForm">
+          <div class="form-group">
+            <label for="email">Correo Electrónico</label>
+            <input type="email" class="form-control" id="email" placeholder="Ingrese su correo electrónico" required>
+          </div>
+          <div class="form-group">
+            <label for="password">Contraseña</label>
+            <input type="password" class="form-control" id="password" placeholder="Ingrese su contraseña" required>
+          </div>
+          <div class="form-group">
+            <label for="role">Rol</label>
+            <select class="form-control" id="role">
+              <option value="admin">Administrador</option>
+              <option value="analyst">Analista</option>
+            </select>
+          </div>
+          <button type="submit" class="btn btn-primary">Registrar</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <script>
+    document.getElementById('registerForm').addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const role = document.getElementById('role').value;
+
+      try {
+        const response = await fetch('http://localhost:3000/api/users/register', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ email, password, role })
+        });
+
+        const data = await response.json();
+        if (data.success) {
+          alert('Usuario registrado exitosamente');
+          window.location.href = 'login.html';
+        } else {
+          alert('Error al registrar usuario: ' + data.error);
+        }
+      } catch (error) {
+        console.error('Error al registrar usuario:', error);
+      }
+    });
+  </script>
+</body>
+</html>

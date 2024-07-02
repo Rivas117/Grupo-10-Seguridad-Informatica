@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+  <link href="/public/css/styles.css" rel="stylesheet">
+  <title>Proyectos Futuros</title>
+</head>
+<body>
+  <header class="bg-dark text-white text-center py-3">
+    <h4>Proyectos Futuros</h4>
+  </header>
+
+  <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container">
+      <button class="btn btn-secondary" onclick="location.href='index.html'">Volver</button>
+    </div>
+  </nav>
+
+  <div class="container">
+    <h5 class="mb-4">Proyectos Futuros</h5>
+    <div id="proyectosContainer" class="row">
+      <!-- Contenido generado dinámicamente -->
+    </div>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', fetchProjects);
+
+    async function fetchProjects() {
+      const projectsContainer = document.getElementById('proyectosContainer');
+      projectsContainer.innerHTML = '';
+
+      // Simulando la información de 10 proyectos económicos
+      const projects = [
+        { title: 'Proyecto 1: Crecimiento Económico', description: 'Análisis y propuestas para el crecimiento económico sostenido.' },
+        { title: 'Proyecto 2: Política Fiscal', description: 'Reformas fiscales para mejorar la recaudación y eficiencia del gasto público.' },
+        { title: 'Proyecto 3: Comercio Internacional', description: 'Estrategias para mejorar la balanza comercial y acuerdos internacionales.' },
+        { title: 'Proyecto 4: Innovación y Tecnología', description: 'Iniciativas para fomentar la innovación y la adopción tecnológica.' },
+        { title: 'Proyecto 5: Desarrollo Regional', description: 'Plan de desarrollo para regiones desfavorecidas.' },
+        { title: 'Proyecto 6: Empleo y Mercado Laboral', description: 'Proyectos para la creación de empleo y mejora del mercado laboral.' },
+        { title: 'Proyecto 7: Sostenibilidad Ambiental', description: 'Medidas para promover el desarrollo económico sostenible.' },
+        { title: 'Proyecto 8: Infraestructura y Transporte', description: 'Inversiones en infraestructura y sistemas de transporte.' },
+        { title: 'Proyecto 9: Educación y Capacitación', description: 'Programas educativos y de capacitación para el desarrollo económico.' },
+        { title: 'Proyecto 10: Salud Pública', description: 'Proyectos para mejorar la salud pública y el acceso a servicios médicos.' }
+      ];
+
+      projects.forEach(proj => {
+        const projectCol = document.createElement('div');
+        projectCol.className = 'col-md-6 col-lg-4 mb-4';
+
+        const projectBox = document.createElement('div');
+        projectBox.className = 'project-box';
+        projectBox.innerHTML = `
+          <i class="fas fa-chart-line"></i>
+          <div class="project-info">
+            <h5>${proj.title}</h5>
+            <p>${proj.description}</p>
+          </div>
+        `;
+
+        projectCol.appendChild(projectBox);
+        projectsContainer.appendChild(projectCol);
+      });
+    }
+  </script>
+</body>
+</html>
+

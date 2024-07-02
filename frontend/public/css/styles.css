@@ -1,0 +1,146 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css');
+
+body {
+  font-family: 'Roboto', sans-serif;
+  background-color: #f8f9fa;
+  margin: 0;
+  padding: 0;
+}
+
+header {
+  background-color: #343a40;
+  color: #ffffff;
+  padding: 1rem;
+  text-align: center;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+header h4 {
+  margin: 0;
+}
+
+.navbar {
+  margin-bottom: 2rem;
+}
+
+.container {
+  padding: 2rem;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.table {
+  margin-top: 1rem;
+}
+
+.table thead th {
+  background-color: #007bff;
+  color: white;
+}
+
+.table tbody tr:nth-child(odd) {
+  background-color: #f9f9f9;
+}
+
+.table tbody tr:hover {
+  background-color: #f1f1f1;
+}
+
+.btn-custom {
+  margin-right: 0.5rem;
+  margin-bottom: 0.5rem;
+  transition: background-color 0.3s;
+}
+
+.btn-custom i {
+  margin-right: 0.5rem;
+}
+
+.btn-custom:hover {
+  background-color: #0056b3;
+  color: #ffffff;
+}
+
+.card-selection {
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  margin-bottom: 1rem;
+  border: 1px solid #007bff;
+  border-radius: 8px;
+}
+
+.card-selection:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.card-selection .card-body {
+  padding: 2rem;
+}
+
+.card-selection i {
+  color: #007bff;
+}
+
+.card-selection h5 {
+  margin-top: 1rem;
+  color: #007bff;
+}
+
+.hidden {
+  display: none;
+}
+
+.project-box {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 1rem;
+  background-color: #f9f9f9;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.project-box:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.project-box i {
+  font-size: 2rem;
+  color: #007bff;
+  margin-right: 1rem;
+}
+
+.project-box .project-info {
+  flex-grow: 1;
+}
+
+.project-box .project-info h5 {
+  margin: 0;
+}
+
+.project-box .project-info p {
+  margin: 0.5rem 0 0;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 1rem;
+  }
+
+  header, footer {
+    text-align: center;
+  }
+
+  .navbar .navbar-nav {
+    flex-direction: column;
+  }
+
+  .card-selection {
+    margin-bottom: 1rem;
+  }
+}
