@@ -127,6 +127,18 @@ header h4 {
   margin: 0.5rem 0 0;
 }
 
+.password-container {
+  position: relative;
+}
+
+.toggle-password {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+  cursor: pointer;
+}
+
 @media (max-width: 768px) {
   .container {
     padding: 1rem;
@@ -144,3 +156,4 @@ header h4 {
     margin-bottom: 1rem;
   }
 }
+

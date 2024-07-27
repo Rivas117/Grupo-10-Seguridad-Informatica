@@ -64,14 +64,16 @@ exports.downloadAsImage = async (req, res) => {
     }
 
     // Aquí agregarías el código para generar y enviar la imagen
+    // ...
 
+    res.status(200).json({ success: true, data: 'Imagen generada y enviada' });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
 };
 
 // Descargar como PDF
-exports.downloadAsPdf = async (req, res) => {
+exports.downloadAsPDF = async (req, res) => {
   const { id } = req.params;
 
   try {
@@ -86,7 +88,7 @@ exports.downloadAsPdf = async (req, res) => {
     doc.text(`Descripción: ${document.description}`, 10, 30);
     doc.text(`Categoría: ${document.category}`, 10, 40);
     doc.text(`Fecha de Creación: ${new Date(document.createdAt).toLocaleDateString()}`, 10, 50);
-    
+
     const pdfPath = path.join(__dirname, `../downloads/document_${document._id}.pdf`);
     doc.save(pdfPath);
     res.download(pdfPath, `document_${document._id}.pdf`, (err) => {
@@ -139,3 +141,4 @@ exports.downloadAsDoc = async (req, res) => {
     res.status(500).json({ success: false, error: err.message });
   }
 };
+

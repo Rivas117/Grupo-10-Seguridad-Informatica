@@ -7,6 +7,41 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
   <link href="/public/css/styles.css" rel="stylesheet">
   <title>Proyectos Futuros</title>
+  <style>
+    .project-box {
+      display: flex;
+      align-items: center;
+      margin-bottom: 1rem;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 1rem;
+      background-color: #f9f9f9;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .project-box:hover {
+      transform: scale(1.02);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .project-box i {
+      font-size: 2rem;
+      color: #007bff;
+      margin-right: 1rem;
+    }
+
+    .project-box .project-info {
+      flex-grow: 1;
+    }
+
+    .project-box .project-info h5 {
+      margin: 0;
+    }
+
+    .project-box .project-info p {
+      margin: 0.5rem 0 0;
+    }
+  </style>
 </head>
 <body>
   <header class="bg-dark text-white text-center py-3">

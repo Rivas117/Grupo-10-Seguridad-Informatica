@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -7,6 +8,49 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
   <link href="/public/css/styles.css" rel="stylesheet">
   <title>Panel de Administrador</title>
+  <style>
+    body {
+      background-color: #f8f9fa;
+    }
+    .navbar {
+      margin-bottom: 20px;
+    }
+    .container {
+      background: white;
+      padding: 20px;
+      border-radius: 5px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    .modal-header {
+      background-color: #007bff;
+      color: white;
+    }
+    .modal-body {
+      max-height: 300px;
+      overflow-y: auto;
+    }
+    .sidebar {
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      z-index: 100;
+      padding: 48px 0 0;
+      box-shadow: inset -1px 0 0 rgba(0, 0, 0, 0.1);
+    }
+    .sidebar-sticky {
+      position: -webkit-sticky;
+      position: sticky;
+      top: 48px;
+      height: calc(100vh - 48px);
+      padding-top: .5rem;
+      overflow-x: hidden;
+      overflow-y: auto;
+    }
+    .hidden {
+      display: none;
+    }
+  </style>
 </head>
 <body>
   <header class="bg-dark text-white text-center py-3">
@@ -15,88 +59,335 @@
 
   <nav class="navbar navbar-expand-lg navbar-light bg-light">
     <div class="container">
-      <button class="btn btn-secondary" onclick="location.href='index.html'">Cerrar Sesión</button>
+      <button class="btn btn-secondary ml-auto" id="logoutButton">Cerrar Sesión</button>
     </div>
   </nav>
 
-  <div class="container">
-    <h5 class="mb-4">Administrar Documentos</h5>
-    <table class="table table-hover">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Título</th>
-          <th>Descripción</th>
-          <th>Categoría</th>
-          <th>Fecha de Creación</th>
-          <th>Acciones</th>
-        </tr>
-      </thead>
-      <tbody id="documentTable">
-        <!-- Contenido generado dinámicamente -->
-      </tbody>
-    </table>
+  <div class="container-fluid">
+    <div class="row">
+      <nav class="col-md-2 d-none d-md-block bg-light sidebar">
+        <div class="sidebar-sticky">
+          <ul class="nav flex-column">
+            <li class="nav-item">
+              <a class="nav-link active" href="dashboard.html">
+                <i class="fas fa-tachometer-alt"></i>
+                Dashboard
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#">
+                <i class="fas fa-file-alt"></i>
+                Documentos
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#">
+                <i class="fas fa-project-diagram"></i>
+                Proyectos
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="usuarios.html">
+                <i class="fas fa-users"></i>
+                Usuarios
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#">
+                <i class="fas fa-chart-bar"></i>
+                Reportes
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#">
+                <i class="fas fa-user-cog"></i>
+                Cuenta Administrativa
+              </a>
+            </li>
+          </ul>
+        </div>
+      </nav>
+
+      <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
+        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        </div>
+
+        <h5 class="mb-4">Administrar Documentos</h5>
+        <form action="/documents/upload" method="POST" enctype="multipart/form-data">
+          <div class="form-group">
+            <label for="title">Título del Documento</label>
+            <input type="text" name="title" class="form-control" id="title" required>
+          </div>
+          <div class="form-group">
+            <label for="description">Descripción</label>
+            <textarea name="description" class="form-control" id="description" rows="3" required></textarea>
+          </div>
+          <div class="form-group">
+            <label for="file">Archivo</label>
+            <input type="file" name="file" class="form-control-file" id="file" required>
+          </div>
+          <button type="submit" class="btn btn-primary">Subir Documento</button>
+        </form>
+
+        <div class="input-group mb-3">
+          <input type="search" id="documentSearch" class="form-control" placeholder="Buscar documentos">
+          <div class="input-group-append">
+            <button class="btn btn-secondary" type="button" onclick="filterDocuments()">Buscar</button>
+          </div>
+        </div>
+
+        <table class="table table-hover mt-4" id="documentTable">
+          <thead class="thead-light">
+            <tr>
+              <th>ID</th>
+              <th>Título</th>
+              <th>Descripción</th>
+              <th>Archivo</th>
+              <th>Fecha de Subida</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Contenido generado dinámicamente -->
+          </tbody>
+        </table>
+
+        <div class="pagination">
+          <button class="btn btn-secondary" id="prevPage">Anterior</button>
+          <button class="btn btn-secondary" id="nextPage">Siguiente</button>
+          <span id="currentPage">1</span> de <span id="totalPages">10</span>
+        </div>
+
+        <!-- Modal de Edición -->
+        <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="editModalLabel">Editar Documento</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body">
+                <form id="editForm">
+                  <div class="form-group">
+                    <label for="editTitle">Título del Documento</label>
+                    <input type="text" name="editTitle" class="form-control" id="editTitle" required>
+                  </div>
+                  <div class="form-group">
+                    <label for="editDescription">Descripción</label>
+                    <textarea name="editDescription" class="form-control" id="editDescription" rows="3" required></textarea>
+                  </div>
+                  <div class="form-group">
+                    <label for="editFile">Archivo</label>
+                    <input type="file" name="editFile" class="form-control-file" id="editFile">
+                  </div>
+                  <input type="hidden" id="editId">
+                  <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Modal de Eliminación -->
+        <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">Eliminar Documento</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body">
+                <p>¿Estás seguro de que deseas eliminar este documento?</p>
+                <input type="hidden" id="deleteId">
+                <button type="submit" class="btn btn-danger">Eliminar</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Administrar Usuarios -->
+        <h5 class="mb-4">Administrar Usuarios</h5>
+        <form action="/users/create" method="POST">
+          <div class="form-group">
+            <label for="userName">Nombre de Usuario</label>
+            <input type="text" name="userName" class="form-control" id="userName" required>
+          </div>
+          <div class="form-group">
+            <label for="userEmail">Email</label>
+            <input type="email" name="userEmail" class="form-control" id="userEmail" required>
+          </div>
+          <div class="form-group">
+            <label for="userRole">Rol</label>
+            <select name="userRole" class="form-control" id="userRole" required>
+              <option value="admin">Admin</option>
+              <option value="user">Usuario</option>
+            </select>
+          </div>
+          <button type="submit" class="btn btn-primary">Crear Usuario</button>
+        </form>
+
+        <table class="table table-hover mt-4" id="userTable">
+          <thead class="thead-light">
+            <tr>
+              <th>ID</th>
+              <th>Nombre</th>
+              <th>Email</th>
+              <th>Rol</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- Contenido generado dinámicamente -->
+          </tbody>
+        </table>
+
+        <!-- Modal de Edición de Usuario -->
+        <div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="editUserModalLabel">Editar Usuario</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body">
+                <form id="editUserForm">
+                  <div class="form-group">
+                    <label for="editUserName">Nombre de Usuario</label>
+                    <input type="text" name="editUserName" class="form-control" id="editUserName" required>
+                  </div>
+                  <div class="form-group">
+                    <label for="editUserEmail">Email</label>
+                    <input type="email" name="editUserEmail" class="form-control" id="editUserEmail" required>
+                  </div>
+                  <div class="form-group">
+                    <label for="editUserRole">Rol</label>
+                    <select name="editUserRole" class="form-control" id="editUserRole" required>
+                      <option value="admin">Admin</option>
+                      <option value="user">Usuario</option>
+                    </select>
+                  </div>
+                  <input type="hidden" id="editUserId">
+                  <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Modal de Eliminación de Usuario -->
+        <div class="modal fade" id="deleteUserModal" tabindex="-1" aria-labelledby="deleteUserModalLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="deleteUserModalLabel">Eliminar Usuario</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body">
+                <p>¿Estás seguro de que deseas eliminar este usuario?</p>
+                <input type="hidden" id="deleteUserId">
+                <button type="submit" class="btn btn-danger">Eliminar</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Compartir Documento -->
+        <div class="modal fade" id="shareDocumentModal" tabindex="-1" aria-labelledby="shareDocumentModalLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="shareDocumentModalLabel">Compartir Documento</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body">
+                <form id="shareDocumentForm">
+                  <div class="form-group">
+                    <label for="shareEmail">Email del destinatario</label>
+                    <input type="email" name="shareEmail" class="form-control" id="shareEmail" required>
+                  </div>
+                  <input type="hidden" id="shareDocumentId">
+                  <button type="submit" class="btn btn-primary">Compartir</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Gestión de Cuenta Administrativa -->
+        <h5 class="mb-4">Gestionar Cuenta Administrativa</h5>
+        <form action="/admin/account/update" method="POST">
+          <div class="form-group">
+            <label for="adminName">Nombre</label>
+            <input type="text" name="adminName" class="form-control" id="adminName" required>
+          </div>
+          <div class="form-group">
+            <label for="adminEmail">Email</label>
+            <input type="email" name="adminEmail" class="form-control" id="adminEmail" required>
+          </div>
+          <div class="form-group">
+            <label for="adminPassword">Contraseña</label>
+            <input type="password" name="adminPassword" class="form-control" id="adminPassword" required>
+          </div>
+          <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+        </form>
+
+      </main>
+    </div>
   </div>
 
   <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
   <script src="/public/js/scripts.js"></script>
   <script>
-    document.addEventListener('DOMContentLoaded', fetchAdminDocuments);
+    document.addEventListener('DOMContentLoaded', () => {
+      fetchDocuments();
+      fetchUsers();
+      paginateTable('documentTable');
+      paginateTable('userTable');
+    });
 
-    async function fetchAdminDocuments() {
-      const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:3000/api/documents', {
-        headers: {
-          Authorization: 'Bearer ' + token
+    document.getElementById('logoutButton').addEventListener('click', function() {
+      fetch('/auth/logout', {
+        method: 'POST'
+      })
+      .then(response => {
+        if (response.ok) {
+          window.location.href = 'index.html';
+        } else {
+          alert('Error al cerrar sesión');
         }
-      });
-
-      const data = await response.json();
-      const tableBody = document.getElementById('documentTable');
-      tableBody.innerHTML = '';
-      data.data.forEach(doc => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-          <td>${doc._id}</td>
-          <td>${doc.title}</td>
-          <td>${doc.description}</td>
-          <td>${doc.category}</td>
-          <td>${new Date(doc.createdAt).toLocaleDateString()}</td>
-          <td>
-            <button class="btn btn-warning btn-custom" onclick="editDocument('${doc._id}')"><i class="fas fa-edit"></i> Editar</button>
-            <button class="btn btn-danger btn-custom" onclick="deleteDocument('${doc._id}')"><i class="fas fa-trash"></i> Eliminar</button>
-          </td>
-        `;
-        tableBody.appendChild(row);
-      });
+      })
+      .catch(err => console.log(err));
+    });
+    
+    function fetchDocuments() {
+      // Lógica para obtener y mostrar documentos
+    }
+    
+    function fetchUsers() {
+      // Lógica para obtener y mostrar usuarios
     }
 
-    async function editDocument(id) {
-      // Lógica para editar el documento
-      alert('Editar documento ' + id);
+    function filterDocuments() {
+      // Lógica para filtrar documentos
     }
 
-    async function deleteDocument(id) {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:3000/api/documents/${id}`, {
-        method: 'DELETE',
-        headers: {
-          Authorization: 'Bearer ' + token
-        }
-      });
-
-      if (response.ok) {
-        alert('Documento eliminado');
-        fetchAdminDocuments();
-      } else {
-        alert('Error al eliminar el documento');
-      }
+    function paginateTable(tableId) {
+      // Lógica para la paginación de tablas
     }
+
+    // Eventos y lógica para edición y eliminación de documentos y usuarios
   </script>
 </body>
 </html>

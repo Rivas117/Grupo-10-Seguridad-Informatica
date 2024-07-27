@@ -1,29 +1,29 @@
 const express = require('express');
-const cors = require('cors');
-const helmet = require('helmet');
-const passport = require('./config/passport');
-const connectDB = require('./config/database');
-const authRoutes = require('./routes/authRoutes');
-const documentRoutes = require('./routes/documentRoutes');
-const projectRoutes = require('./routes/projectRoutes');
 const dotenv = require('dotenv');
+const connectDB = require('./config/database');
+const createDefaultUsers = require('./utils/createDefaultUsers');
+const path = require('path');
+const app = express();
 
 dotenv.config();
-
-const app = express();
-const PORT = process.env.PORT || 3000;
-
 connectDB();
 
-app.use(helmet());
-app.use(cors());
+// Middleware para parsear JSON
 app.use(express.json());
-app.use(passport.initialize());
 
-app.use('/api/users', authRoutes);
-app.use('/api/documents', documentRoutes);
-app.use('/api/projects', projectRoutes);
+// Servir archivos estáticos
+app.use(express.static(path.join(__dirname, '../frontend/public')));
 
-app.listen(PORT, () => {
-  console.log(`Servidor corriendo en el puerto ${PORT}`);
-});
+// Rutas
+const documentRoutes = require('./routes/documentRoutes');
+const authRoutes = require('./routes/authRoutes');
+
+app.use('/api/documentos', documentRoutes);
+app.use('/api/usuarios', authRoutes);
+
+// Crear usuarios por defecto
+createDefaultUsers();
+
+// Escuchar en el puerto especificado
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`Servidor corriendo en el puerto ${PORT}`));

@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Administrar Analistas</title>
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: #f8f9fa;
+    }
+    .navbar {
+      margin-bottom: 20px;
+    }
+    .container {
+      background: white;
+      padding: 20px;
+      border-radius: 5px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    .modal-header {
+      background-color: #007bff;
+      color: white;
+    }
+    .modal-body {
+      max-height: 300px;
+      overflow-y: auto;
+    }
+  </style>
+</head>
+<body>
+  <header class="bg-dark text-white text-center py-3">
+    <h4>Administrar Analistas</h4>
+  </header>
+
+  <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container">
+      <button class="btn btn-secondary ml-auto" id="logoutButton">Cerrar Sesión</button>
+    </div>
+  </nav>
+
+  <div class="container">
+    <h5 class="mb-4">Crear Cuenta de Analista</h5>
+    <form id="analyst-form">
+      <div class="form-group">
+        <label for="analyst-name">Nombre</label>
+        <input type="text" id="analyst-name" name="name" class="form-control" required>
+      </div>
+      <div class="form-group">
+        <label for="analyst-email">Correo</label>
+        <input type="email" id="analyst-email" name="email" class="form-control" required>
+      </div>
+      <div class="form-group">
+        <label for="analyst-password">Contraseña</label>
+        <input type="password" id="analyst-password" name="password" class="form-control" required>
+      </div>
+      <button type="submit" class="btn btn-primary">Crear Cuenta</button>
+    </form>
+
+    <h5 class="mt-5 mb-4">Lista de Analistas</h5>
+    <table class="table table-hover mt-4">
+      <thead class="thead-light">
+        <tr>
+          <th>Nombre</th>
+          <th>Correo</th>
+          <th>Contraseña</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody id="analyst-list">
+        <!-- Aquí se llenará la lista de analistas -->
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Modal de Edición -->
+  <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="editModalLabel">Editar Analista</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form id="editForm">
+            <div class="form-group">
+              <label for="edit-name">Nombre</label>
+              <input type="text" name="name" class="form-control" id="edit-name" required>
+            </div>
+            <div class="form-group">
+              <label for="edit-email">Correo</label>
+              <input type="email" name="email" class="form-control" id="edit-email" required>
+            </div>
+            <div class="form-group">
+              <label for="edit-password">Contraseña</label>
+              <input type="password" name="password" class="form-control" id="edit-password">
+            </div>
+            <input type="hidden" id="edit-id">
+            <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Eliminación -->
+  <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="deleteModalLabel">Eliminar Analista</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p>¿Estás seguro de que deseas eliminar esta cuenta de analista?</p>
+          <input type="hidden" id="deleteId">
+          <button type="button" class="btn btn-danger" id="confirmDelete">Eliminar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <script>
+    const defaultAccounts = [
+      { id: 1, name: 'Admin User', email: 'admin@example.com', password: 'adminpassword', role: 'admin' },
+      { id: 2, name: 'Analyst User', email: 'analyst@example.com', password: 'analystpassword', role: 'analyst' }
+    ];
+
+    document.addEventListener('DOMContentLoaded', () => {
+      fetchAnalysts();
+    });
+
+    document.getElementById('analyst-form').addEventListener('submit', function(event) {
+      event.preventDefault();
+      const name = document.getElementById('analyst-name').value;
+      const email = document.getElementById('analyst-email').value;
+      const password = document.getElementById('analyst-password').value;
+
+      // Validar y Sanear Entradas
+      if (!validateEmail(email) || !validatePassword(password)) {
+        alert('Correo o contraseña no válidos.');
+        return;
+      }
+
+      // Implementar lógica para enviar datos al servidor
+      addAnalyst({ id: defaultAccounts.length + 1, name, email, password, role: 'analyst' });
+
+      // Resetear formulario
+      this.reset();
+    });
+
+    function fetchAnalysts() {
+      const analystList = document.getElementById('analyst-list');
+      analystList.innerHTML = '';
+
+      defaultAccounts.filter(account => account.role === 'analyst').forEach(account => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${account.name}</td>
+          <td>${account.email}</td>
+          <td>${account.password}</td>
+          <td>
+            <button class="btn btn-info btn-sm" onclick="editAnalyst(${account.id})">Editar</button>
+            <button class="btn btn-danger btn-sm" onclick="confirmDeleteAnalyst(${account.id})">Eliminar</button>
+          </td>
+        `;
+        analystList.appendChild(row);
+      });
+    }
+
+    function addAnalyst(analyst) {
+      defaultAccounts.push(analyst);
+      fetchAnalysts();
+    }
+
+    function editAnalyst(id) {
+      const analyst = defaultAccounts.find(account => account.id === id);
+      if (analyst) {
+        document.getElementById('edit-id').value = analyst.id;
+        document.getElementById('edit-name').value = analyst.name;
+        document.getElementById('edit-email').value = analyst.email;
+        $('#editModal').modal('show');
+      }
+    }
+
+    document.getElementById('editForm').addEventListener('submit', function(event) {
+      event.preventDefault();
+      const id = document.getElementById('edit-id').value;
+      const name = document.getElementById('edit-name').value;
+      const email = document.getElementById('edit-email').value;
+      const password = document.getElementById('edit-password').value;
+
+      const analyst = defaultAccounts.find(account => account.id == id);
+      if (analyst) {
+        analyst.name = name;
+        analyst.email = email;
+        if (password) {
+          analyst.password = hashPassword(password);
+        }
+        fetchAnalysts();
+        $('#editModal').modal('hide');
+      }
+    });
+
+    function confirmDeleteAnalyst(id) {
+      document.getElementById('deleteId').value = id;
+      $('#deleteModal').modal('show');
+    }
+
+    document.getElementById('confirmDelete').addEventListener('click', function() {
+      const id = document.getElementById('deleteId').value;
+      deleteAnalyst(id);
+      $('#deleteModal').modal('hide');
+    });
+
+    function deleteAnalyst(id) {
+      const index = defaultAccounts.findIndex(account => account.id === id);
+      if (index !== -1) {
+        defaultAccounts.splice(index, 1);
+        fetchAnalysts();
+      }
+    }
+
+    document.getElementById('logoutButton').addEventListener('click', function() {
+      fetch('/auth/logout', {
+        method: 'POST'
+      })
+      .then(response => {
+        if (response.ok) {
+          window.location.href = 'index.html';
+        } else {
+          alert('Error al cerrar sesión');
+        }
+      })
+      .catch(err => console.log(err));
+    });
+
+    function validateEmail(email) {
+      const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return re.test(String(email).toLowerCase());
+    }
+
+    function validatePassword(password) {
+      // Implementar lógica de validación de contraseña (mínimo 8 caracteres, etc.)
+      return password.length >= 8;
+    }
+
+    function hashPassword(password) {
+      // Implementar lógica de hashing seguro (por ejemplo, bcrypt)
+      return password; // Placeholder, reemplazar con hash real
+    }
+  </script>
+</body>
+</html>
