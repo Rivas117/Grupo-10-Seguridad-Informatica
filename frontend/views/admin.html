@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -47,8 +46,23 @@
       overflow-x: hidden;
       overflow-y: auto;
     }
-    .hidden {
-      display: none;
+    .chart-container {
+      position: relative;
+      height: 40vh;
+      width: 30vw;
+      margin: 10px;
+    }
+    .interpretation {
+      background: #e9ecef;
+      padding: 10px;
+      border-radius: 5px;
+      margin-top: 20px;
+    }
+    .message-admin {
+      background: #d4edda;
+      padding: 10px;
+      border-radius: 5px;
+      margin-top: 20px;
     }
   </style>
 </head>
@@ -75,15 +89,9 @@
               </a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="#">
+              <a class="nav-link" href="docs.html">
                 <i class="fas fa-file-alt"></i>
                 Documentos
-              </a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#">
-                <i class="fas fa-project-diagram"></i>
-                Proyectos
               </a>
             </li>
             <li class="nav-item">
@@ -93,13 +101,13 @@
               </a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="#">
+              <a class="nav-link" href="reportes.html">
                 <i class="fas fa-chart-bar"></i>
                 Reportes
               </a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="#">
+              <a class="nav-link" href="cuenta.html">
                 <i class="fas fa-user-cog"></i>
                 Cuenta Administrativa
               </a>
@@ -110,284 +118,178 @@
 
       <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
         <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+          <h1 class="h2">Indicadores de Desempeño</h1>
         </div>
 
-        <h5 class="mb-4">Administrar Documentos</h5>
-        <form action="/documents/upload" method="POST" enctype="multipart/form-data">
-          <div class="form-group">
-            <label for="title">Título del Documento</label>
-            <input type="text" name="title" class="form-control" id="title" required>
-          </div>
-          <div class="form-group">
-            <label for="description">Descripción</label>
-            <textarea name="description" class="form-control" id="description" rows="3" required></textarea>
-          </div>
-          <div class="form-group">
-            <label for="file">Archivo</label>
-            <input type="file" name="file" class="form-control-file" id="file" required>
-          </div>
-          <button type="submit" class="btn btn-primary">Subir Documento</button>
-        </form>
-
-        <div class="input-group mb-3">
-          <input type="search" id="documentSearch" class="form-control" placeholder="Buscar documentos">
-          <div class="input-group-append">
-            <button class="btn btn-secondary" type="button" onclick="filterDocuments()">Buscar</button>
+        <div class="d-flex justify-content-center">
+          <div class="chart-container">
+            <canvas id="performanceIndicatorsChart"></canvas>
           </div>
         </div>
 
-        <table class="table table-hover mt-4" id="documentTable">
-          <thead class="thead-light">
-            <tr>
-              <th>ID</th>
-              <th>Título</th>
-              <th>Descripción</th>
-              <th>Archivo</th>
-              <th>Fecha de Subida</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            <!-- Contenido generado dinámicamente -->
-          </tbody>
-        </table>
-
-        <div class="pagination">
-          <button class="btn btn-secondary" id="prevPage">Anterior</button>
-          <button class="btn btn-secondary" id="nextPage">Siguiente</button>
-          <span id="currentPage">1</span> de <span id="totalPages">10</span>
+        <div class="interpretation">
+          <h5>Interpretación del Gráfico</h5>
+          <p>El gráfico muestra los indicadores de desempeño de la organización, destacando las áreas de mayor y menor rendimiento. Es crucial enfocar los esfuerzos en las áreas con menor rendimiento para mejorar los resultados globales.</p>
         </div>
 
-        <!-- Modal de Edición -->
-        <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
-          <div class="modal-dialog">
-            <div class="modal-content">
-              <div class="modal-header">
-                <h5 class="modal-title" id="editModalLabel">Editar Documento</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                  <span aria-hidden="true">&times;</span>
-                </button>
-              </div>
-              <div class="modal-body">
-                <form id="editForm">
-                  <div class="form-group">
-                    <label for="editTitle">Título del Documento</label>
-                    <input type="text" name="editTitle" class="form-control" id="editTitle" required>
-                  </div>
-                  <div class="form-group">
-                    <label for="editDescription">Descripción</label>
-                    <textarea name="editDescription" class="form-control" id="editDescription" rows="3" required></textarea>
-                  </div>
-                  <div class="form-group">
-                    <label for="editFile">Archivo</label>
-                    <input type="file" name="editFile" class="form-control-file" id="editFile">
-                  </div>
-                  <input type="hidden" id="editId">
-                  <button type="submit" class="btn btn-primary">Guardar Cambios</button>
-                </form>
-              </div>
-            </div>
+        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+          <h1 class="h2">Satisfacción del Cliente</h1>
+        </div>
+
+        <div class="d-flex justify-content-center">
+          <div class="chart-container">
+            <canvas id="customerSatisfactionChart"></canvas>
           </div>
         </div>
 
-        <!-- Modal de Eliminación -->
-        <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
-          <div class="modal-dialog">
-            <div class="modal-content">
-              <div class="modal-header">
-                <h5 class="modal-title" id="deleteModalLabel">Eliminar Documento</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                  <span aria-hidden="true">&times;</span>
-                </button>
-              </div>
-              <div class="modal-body">
-                <p>¿Estás seguro de que deseas eliminar este documento?</p>
-                <input type="hidden" id="deleteId">
-                <button type="submit" class="btn btn-danger">Eliminar</button>
-              </div>
-            </div>
+        <div class="interpretation">
+          <h5>Interpretación del Gráfico</h5>
+          <p>Este gráfico muestra la evolución de la satisfacción del cliente a lo largo del tiempo. Se observa una tendencia positiva, pero es necesario seguir trabajando para mantener y mejorar estos niveles de satisfacción.</p>
+        </div>
+
+        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+          <h1 class="h2">Eficiencia Operativa</h1>
+        </div>
+
+        <div class="d-flex justify-content-center">
+          <div class="chart-container">
+            <canvas id="operationalEfficiencyChart"></canvas>
           </div>
         </div>
 
-        <!-- Administrar Usuarios -->
-        <h5 class="mb-4">Administrar Usuarios</h5>
-        <form action="/users/create" method="POST">
-          <div class="form-group">
-            <label for="userName">Nombre de Usuario</label>
-            <input type="text" name="userName" class="form-control" id="userName" required>
-          </div>
-          <div class="form-group">
-            <label for="userEmail">Email</label>
-            <input type="email" name="userEmail" class="form-control" id="userEmail" required>
-          </div>
-          <div class="form-group">
-            <label for="userRole">Rol</label>
-            <select name="userRole" class="form-control" id="userRole" required>
-              <option value="admin">Admin</option>
-              <option value="user">Usuario</option>
-            </select>
-          </div>
-          <button type="submit" class="btn btn-primary">Crear Usuario</button>
-        </form>
-
-        <table class="table table-hover mt-4" id="userTable">
-          <thead class="thead-light">
-            <tr>
-              <th>ID</th>
-              <th>Nombre</th>
-              <th>Email</th>
-              <th>Rol</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            <!-- Contenido generado dinámicamente -->
-          </tbody>
-        </table>
-
-        <!-- Modal de Edición de Usuario -->
-        <div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
-          <div class="modal-dialog">
-            <div class="modal-content">
-              <div class="modal-header">
-                <h5 class="modal-title" id="editUserModalLabel">Editar Usuario</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                  <span aria-hidden="true">&times;</span>
-                </button>
-              </div>
-              <div class="modal-body">
-                <form id="editUserForm">
-                  <div class="form-group">
-                    <label for="editUserName">Nombre de Usuario</label>
-                    <input type="text" name="editUserName" class="form-control" id="editUserName" required>
-                  </div>
-                  <div class="form-group">
-                    <label for="editUserEmail">Email</label>
-                    <input type="email" name="editUserEmail" class="form-control" id="editUserEmail" required>
-                  </div>
-                  <div class="form-group">
-                    <label for="editUserRole">Rol</label>
-                    <select name="editUserRole" class="form-control" id="editUserRole" required>
-                      <option value="admin">Admin</option>
-                      <option value="user">Usuario</option>
-                    </select>
-                  </div>
-                  <input type="hidden" id="editUserId">
-                  <button type="submit" class="btn btn-primary">Guardar Cambios</button>
-                </form>
-              </div>
-            </div>
-          </div>
+        <div class="interpretation">
+          <h5>Interpretación del Gráfico</h5>
+          <p>El gráfico de eficiencia operativa muestra cómo los recursos están siendo utilizados en las operaciones. La mejora en la eficiencia operativa puede conducir a una reducción de costos y una mayor productividad.</p>
         </div>
 
-        <!-- Modal de Eliminación de Usuario -->
-        <div class="modal fade" id="deleteUserModal" tabindex="-1" aria-labelledby="deleteUserModalLabel" aria-hidden="true">
-          <div class="modal-dialog">
-            <div class="modal-content">
-              <div class="modal-header">
-                <h5 class="modal-title" id="deleteUserModalLabel">Eliminar Usuario</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                  <span aria-hidden="true">&times;</span>
-                </button>
-              </div>
-              <div class="modal-body">
-                <p>¿Estás seguro de que deseas eliminar este usuario?</p>
-                <input type="hidden" id="deleteUserId">
-                <button type="submit" class="btn btn-danger">Eliminar</button>
-              </div>
-            </div>
-          </div>
+        <div class="message-admin">
+          <h5>Mensaje para el Administrador</h5>
+          <p>¡Gran trabajo! Tu liderazgo es clave para el éxito de nuestro equipo. Sigue inspirando a todos con tu dedicación y visión. ¡Que tengas un día fantástico y lleno de logros!</p>
         </div>
-
-        <!-- Compartir Documento -->
-        <div class="modal fade" id="shareDocumentModal" tabindex="-1" aria-labelledby="shareDocumentModalLabel" aria-hidden="true">
-          <div class="modal-dialog">
-            <div class="modal-content">
-              <div class="modal-header">
-                <h5 class="modal-title" id="shareDocumentModalLabel">Compartir Documento</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                  <span aria-hidden="true">&times;</span>
-                </button>
-              </div>
-              <div class="modal-body">
-                <form id="shareDocumentForm">
-                  <div class="form-group">
-                    <label for="shareEmail">Email del destinatario</label>
-                    <input type="email" name="shareEmail" class="form-control" id="shareEmail" required>
-                  </div>
-                  <input type="hidden" id="shareDocumentId">
-                  <button type="submit" class="btn btn-primary">Compartir</button>
-                </form>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Gestión de Cuenta Administrativa -->
-        <h5 class="mb-4">Gestionar Cuenta Administrativa</h5>
-        <form action="/admin/account/update" method="POST">
-          <div class="form-group">
-            <label for="adminName">Nombre</label>
-            <input type="text" name="adminName" class="form-control" id="adminName" required>
-          </div>
-          <div class="form-group">
-            <label for="adminEmail">Email</label>
-            <input type="email" name="adminEmail" class="form-control" id="adminEmail" required>
-          </div>
-          <div class="form-group">
-            <label for="adminPassword">Contraseña</label>
-            <input type="password" name="adminPassword" class="form-control" id="adminPassword" required>
-          </div>
-          <button type="submit" class="btn btn-primary">Guardar Cambios</button>
-        </form>
-
       </main>
     </div>
   </div>
 
-  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
-  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-  <script src="/public/js/scripts.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      fetchDocuments();
-      fetchUsers();
-      paginateTable('documentTable');
-      paginateTable('userTable');
+    document.addEventListener('DOMContentLoaded', function() {
+      // Gráfico de indicadores de desempeño
+      const ctx1 = document.getElementById('performanceIndicatorsChart').getContext('2d');
+      const performanceIndicatorsChart = new Chart(ctx1, {
+        type: 'bar',
+        data: {
+          labels: ['Ventas', 'Marketing', 'Finanzas', 'Operaciones', 'Recursos Humanos'],
+          datasets: [{
+            label: 'Indicadores de Desempeño',
+            data: [75, 80, 60, 70, 85], // Datos de ejemplo
+            backgroundColor: [
+              'rgba(255, 99, 132, 0.2)',
+              'rgba(54, 162, 235, 0.2)',
+              'rgba(255, 206, 86, 0.2)',
+              'rgba(75, 192, 192, 0.2)',
+              'rgba(153, 102, 255, 0.2)'
+            ],
+            borderColor: [
+              'rgba(255, 99, 132, 1)',
+              'rgba(54, 162, 235, 1)',
+              'rgba(255, 206, 86, 1)',
+              'rgba(75, 192, 192, 1)',
+              'rgba(153, 102, 255, 1)'
+            ],
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            x: {
+              display: true,
+              title: {
+                display: true,
+                text: 'Áreas'
+              }
+            },
+            y: {
+              display: true,
+              title: {
+                display: true,
+                text: 'Puntuación'
+              }
+            }
+          }
+        }
+      });
+
+      // Gráfico de satisfacción del cliente
+      const ctx2 = document.getElementById('customerSatisfactionChart').getContext('2d');
+      const customerSatisfactionChart = new Chart(ctx2, {
+        type: 'line',
+        data: {
+          labels: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+          datasets: [{
+            label: 'Satisfacción del Cliente',
+            data: [70, 75, 80, 85, 90, 95, 92, 88, 85, 90, 93, 97], // Datos de ejemplo
+            borderColor: 'rgb(75, 192, 192)',
+            fill: false,
+            tension: 0.1
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            x: {
+              display: true,
+              title: {
+                display: true,
+                text: 'Meses'
+              }
+            },
+            y: {
+              display: true,
+              title: {
+                display: true,
+                text: 'Puntuación'
+              }
+            }
+          }
+        }
+      });
+
+      // Gráfico de eficiencia operativa
+      const ctx3 = document.getElementById('operationalEfficiencyChart').getContext('2d');
+      const operationalEfficiencyChart = new Chart(ctx3, {
+        type: 'pie',
+        data: {
+          labels: ['Producción', 'Distribución', 'Mantenimiento', 'Logística', 'Calidad'],
+          datasets: [{
+            label: 'Eficiencia Operativa',
+            data: [25, 20, 30, 15, 10], // Datos de ejemplo
+            backgroundColor: [
+              'rgba(255, 99, 132, 0.2)',
+              'rgba(54, 162, 235, 0.2)',
+              'rgba(255, 206, 86, 0.2)',
+              'rgba(75, 192, 192, 0.2)',
+              'rgba(153, 102, 255, 0.2)'
+            ],
+            borderColor: [
+              'rgba(255, 99, 132, 1)',
+              'rgba(54, 162, 235, 1)',
+              'rgba(255, 206, 86, 1)',
+              'rgba(75, 192, 192, 1)',
+              'rgba(153, 102, 255, 1)'
+            ],
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true
+        }
+      });
     });
 
     document.getElementById('logoutButton').addEventListener('click', function() {
-      fetch('/auth/logout', {
-        method: 'POST'
-      })
-      .then(response => {
-        if (response.ok) {
-          window.location.href = 'index.html';
-        } else {
-          alert('Error al cerrar sesión');
-        }
-      })
-      .catch(err => console.log(err));
+      window.location.href = 'documentos.html';
     });
-    
-    function fetchDocuments() {
-      // Lógica para obtener y mostrar documentos
-    }
-    
-    function fetchUsers() {
-      // Lógica para obtener y mostrar usuarios
-    }
-
-    function filterDocuments() {
-      // Lógica para filtrar documentos
-    }
-
-    function paginateTable(tableId) {
-      // Lógica para la paginación de tablas
-    }
-
-    // Eventos y lógica para edición y eliminación de documentos y usuarios
   </script>
 </body>
 </html>

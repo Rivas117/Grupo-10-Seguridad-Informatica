@@ -1,29 +1,15 @@
 const express = require('express');
-const dotenv = require('dotenv');
 const connectDB = require('./config/database');
-const createDefaultUsers = require('./utils/createDefaultUsers');
-const path = require('path');
-const app = express();
+const userRoutes = require('./routes/userRoutes');
+const cors = require('cors');
 
-dotenv.config();
+const app = express();
 connectDB();
 
-// Middleware para parsear JSON
+app.use(cors());
 app.use(express.json());
 
-// Servir archivos estáticos
-app.use(express.static(path.join(__dirname, '../frontend/public')));
+app.use('/api/users', userRoutes);
 
-// Rutas
-const documentRoutes = require('./routes/documentRoutes');
-const authRoutes = require('./routes/authRoutes');
-
-app.use('/api/documentos', documentRoutes);
-app.use('/api/usuarios', authRoutes);
-
-// Crear usuarios por defecto
-createDefaultUsers();
-
-// Escuchar en el puerto especificado
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Servidor corriendo en el puerto ${PORT}`));
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

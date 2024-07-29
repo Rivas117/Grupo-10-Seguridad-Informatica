@@ -46,6 +46,24 @@
       overflow-x: hidden;
       overflow-y: auto;
     }
+    .chart-container {
+      position: relative;
+      height: 40vh;
+      width: 30vw;
+      margin: 10px;
+    }
+    .interpretation {
+      background: #e9ecef;
+      padding: 10px;
+      border-radius: 5px;
+      margin-top: 20px;
+    }
+    .message-analyst {
+      background: #d4edda;
+      padding: 10px;
+      border-radius: 5px;
+      margin-top: 20px;
+    }
   </style>
 </head>
 <body>
@@ -65,25 +83,13 @@
         <div class="sidebar-sticky">
           <ul class="nav flex-column">
             <li class="nav-item">
-              <a class="nav-link active" href="#">
-                <i class="fas fa-tachometer-alt"></i>
-                Dashboard
-              </a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#">
+              <a class="nav-link" href="dds.html">
                 <i class="fas fa-file-alt"></i>
                 Documentos
               </a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="#">
-                <i class="fas fa-project-diagram"></i>
-                Proyectos
-              </a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#">
+              <a class="nav-link" href="cuentaalis.html">
                 <i class="fas fa-user-cog"></i>
                 Cuenta
               </a>
@@ -94,311 +100,130 @@
 
       <main role="main" class="col-md-9 ml-sm-auto col-lg-10 px-md-4">
         <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+          <h1 class="h2">Crecimiento de la Moneda</h1>
         </div>
 
-        <h5 class="mb-4">Subir Documentos para Aprobación</h5>
-        <form action="/documents/upload" method="POST" enctype="multipart/form-data">
-          <div class="form-group">
-            <label for="title">Título del Documento</label>
-            <input type="text" name="title" class="form-control" id="title" required>
-          </div>
-          <div class="form-group">
-            <label for="description">Descripción</label>
-            <textarea name="description" class="form-control" id="description" rows="3" required></textarea>
-          </div>
-          <div class="form-group">
-            <label for="file">Archivo</label>
-            <input type="file" name="file" class="form-control-file" id="file" required>
-          </div>
-          <button type="submit" class="btn btn-primary">Enviar para Aprobación</button>
-        </form>
-
-        <div class="input-group my-4">
-          <input type="search" id="documentSearch" class="form-control" placeholder="Buscar documentos">
-          <div class="input-group-append">
-            <button class="btn btn-secondary" type="button" onclick="filterDocuments()">Buscar</button>
+        <div class="d-flex justify-content-center">
+          <div class="chart-container">
+            <canvas id="currencyGrowthChart"></canvas>
           </div>
         </div>
 
-        <h5 class="mt-5">Documentos Subidos</h5>
-        <table class="table table-hover mt-4">
-          <thead class="thead-light">
-            <tr>
-              <th>ID</th>
-              <th>Título</th>
-              <th>Descripción</th>
-              <th>Archivo</th>
-              <th>Fecha de Subida</th>
-              <th>Estado</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody id="documentsTableBody">
-            <!-- Filas de documentos se cargarán aquí dinámicamente -->
-          </tbody>
-        </table>
+        <div class="interpretation">
+          <h5>Interpretación del Gráfico</h5>
+          <p>El gráfico muestra el crecimiento de la moneda durante el año, con picos notables en los meses de mayo y octubre. Esto puede estar relacionado con eventos económicos significativos durante estos periodos.</p>
+        </div>
 
-        <!-- Modal de Detalles -->
-        <div class="modal fade" id="detailsModal" tabindex="-1" aria-labelledby="detailsModalLabel" aria-hidden="true">
-          <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-              <div class="modal-header">
-                <h5 class="modal-title" id="detailsModalLabel">Detalles del Documento</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                  <span aria-hidden="true">&times;</span>
-                </button>
-              </div>
-              <div class="modal-body">
-                <div id="documentDetailsContent">
-                  <!-- Contenido de los detalles del documento se cargará aquí dinámicamente -->
-                </div>
-              </div>
-            </div>
+        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+          <h1 class="h2">Comparación de Monedas</h1>
+        </div>
+
+        <div class="d-flex justify-content-center">
+          <div class="chart-container">
+            <canvas id="currencyComparisonChart"></canvas>
           </div>
         </div>
 
-        <!-- Modal de Edición -->
-        <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
-          <div class="modal-dialog">
-            <div class="modal-content">
-              <div class="modal-header">
-                <h5 class="modal-title" id="editModalLabel">Editar Documento</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                  <span aria-hidden="true">&times;</span>
-                </button>
-              </div>
-              <div class="modal-body">
-                <form id="editForm">
-                  <div class="form-group">
-                    <label for="editTitle">Título del Documento</label>
-                    <input type="text" name="editTitle" class="form-control" id="editTitle" required>
-                  </div>
-                  <div class="form-group">
-                    <label for="editDescription">Descripción</label>
-                    <textarea name="editDescription" class="form-control" id="editDescription" rows="3" required></textarea>
-                  </div>
-                  <div class="form-group">
-                    <label for="editFile">Archivo</label>
-                    <input type="file" name="editFile" class="form-control-file" id="editFile">
-                  </div>
-                  <input type="hidden" id="editId">
-                  <button type="submit" class="btn btn-primary">Guardar Cambios</button>
-                </form>
-              </div>
-            </div>
-          </div>
+        <div class="interpretation">
+          <h5>Interpretación del Gráfico</h5>
+          <p>Este gráfico compara el valor relativo de diferentes monedas en relación con el USD. Se observa que el JPY tiene un valor mucho más alto en comparación con el USD, mientras que el EUR y el GBP se mantienen cercanos en valor.</p>
         </div>
 
-        <!-- Modal de Eliminación -->
-        <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
-          <div class="modal-dialog">
-            <div class="modal-content">
-              <div class="modal-header">
-                <h5 class="modal-title" id="deleteModalLabel">Eliminar Documento</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                  <span aria-hidden="true">&times;</span>
-                </button>
-              </div>
-              <div class="modal-body">
-                <p>¿Estás seguro de que deseas eliminar este documento?</p>
-                <input type="hidden" id="deleteId">
-                <button type="submit" class="btn btn-danger">Eliminar</button>
-              </div>
-            </div>
-          </div>
+        <div class="message-analyst">
+          <h5>Mensaje para el Analista</h5>
+          <p>¡Excelente trabajo! Sigue así, tu esfuerzo y dedicación son fundamentales para el éxito de nuestro equipo. ¡Que tengas un día productivo y lleno de logros!</p>
         </div>
-
-        <!-- Compartir Documento -->
-        <div class="modal fade" id="shareDocumentModal" tabindex="-1" aria-labelledby="shareDocumentModalLabel" aria-hidden="true">
-          <div class="modal-dialog">
-            <div class="modal-content">
-              <div class="modal-header">
-                <h5 class="modal-title" id="shareDocumentModalLabel">Compartir Documento</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                  <span aria-hidden="true">&times;</span>
-                </button>
-              </div>
-              <div class="modal-body">
-                <form id="shareDocumentForm">
-                  <div class="form-group">
-                    <label for="shareEmail">Email del destinatario</label>
-                    <input type="email" name="shareEmail" class="form-control" id="shareEmail" required>
-                  </div>
-                  <input type="hidden" id="shareDocumentId">
-                  <button type="submit" class="btn btn-primary">Compartir</button>
-                </form>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Gestión de Cuenta -->
-        <h5 class="mb-4">Gestionar Cuenta de Analista</h5>
-        <form action="/analyst/account/update" method="POST">
-          <div class="form-group">
-            <label for="analystName">Nombre</label>
-            <input type="text" name="analystName" class="form-control" id="analystName" required>
-          </div>
-          <div class="form-group">
-            <label for="analystEmail">Email</label>
-            <input type="email" name="analystEmail" class="form-control" id="analystEmail" required>
-          </div>
-          <div class="form-group">
-            <label for="analystPassword">Contraseña</label>
-            <input type="password" name="analystPassword" class="form-control" id="analystPassword" required>
-          </div>
-          <button type="submit" class="btn btn-primary">Guardar Cambios</button>
-        </form>
       </main>
     </div>
   </div>
 
-  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
-  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-  <script src="/public/js/scripts.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function() {
-      loadDocuments();
-    });
-
-    function loadDocuments() {
-      // Simulación de carga de documentos desde una API
-      const documents = [
-        {
-          _id: '1',
-          title: 'Documento 1',
-          description: 'Descripción del Documento 1',
-          filePath: '/files/doc1.pdf',
-          fileName: 'doc1.pdf',
-          uploadDate: new Date(),
-          status: 'approved'
+      // Gráfico de crecimiento de la moneda
+      const ctx1 = document.getElementById('currencyGrowthChart').getContext('2d');
+      const currencyGrowthChart = new Chart(ctx1, {
+        type: 'line',
+        data: {
+          labels: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+          datasets: [{
+            label: 'Crecimiento de la Moneda',
+            data: [30, 32, 29, 31, 34, 35, 33, 37, 40, 38, 42, 45], // Datos de ejemplo
+            borderColor: 'rgb(75, 192, 192)',
+            fill: false,
+            tension: 0.1
+          }]
         },
-        {
-          _id: '2',
-          title: 'Documento 2',
-          description: 'Descripción del Documento 2',
-          filePath: '/files/doc2.pdf',
-          fileName: 'doc2.pdf',
-          uploadDate: new Date(),
-          status: 'rejected'
-        },
-        {
-          _id: '3',
-          title: 'Documento 3',
-          description: 'Descripción del Documento 3',
-          filePath: '/files/doc3.pdf',
-          fileName: 'doc3.pdf',
-          uploadDate: new Date(),
-          status: 'pending'
-        }
-      ];
-
-      const tableBody = document.getElementById('documentsTableBody');
-      tableBody.innerHTML = '';
-
-      documents.forEach(document => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-          <td>${document._id}</td>
-          <td>${document.title}</td>
-          <td>${document.description}</td>
-          <td><a href="${document.filePath}" target="_blank">${document.fileName}</a></td>
-          <td>${document.uploadDate.toLocaleDateString()}</td>
-          <td>${getStatusBadge(document.status)}</td>
-          <td>
-            <button class="btn btn-info btn-sm" onclick="showDocumentDetails('${document._id}')">
-              <i class="fas fa-info-circle"></i> Detalles
-            </button>
-            <button class="btn btn-warning btn-sm" onclick="editDocument('${document._id}')">
-              <i class="fas fa-edit"></i> Editar
-            </button>
-            <button class="btn btn-danger btn-sm" onclick="deleteDocument('${document._id}')">
-              <i class="fas fa-trash"></i> Eliminar
-            </button>
-            <button class="btn btn-primary btn-sm" onclick="shareDocument('${document._id}')">
-              <i class="fas fa-share"></i> Compartir
-            </button>
-          </td>
-        `;
-        tableBody.appendChild(row);
-      });
-    }
-
-    function getStatusBadge(status) {
-      if (status === 'approved') {
-        return '<span class="badge badge-success">Aprobado</span>';
-      } else if (status === 'rejected') {
-        return '<span class="badge badge-danger">Rechazado</span>';
-      } else {
-        return '<span class="badge badge-warning">En Revisión</span>';
-      }
-    }
-
-    function showDocumentDetails(id) {
-      // Lógica para cargar y mostrar los detalles del documento
-      $('#documentDetailsContent').html('<p>Cargando...</p>');
-      $.ajax({
-        url: '/documents/details/' + id,
-        method: 'GET',
-        success: function(data) {
-          $('#documentDetailsContent').html(data);
-          $('#detailsModal').modal('show');
-        },
-        error: function(error) {
-          $('#documentDetailsContent').html('<p>Error al cargar los detalles del documento.</p>');
-        }
-      });
-    }
-
-    function editDocument(id) {
-      // Lógica para cargar los datos del documento y mostrar el modal de edición
-      $('#editForm').trigger('reset');
-      $('#editId').val(id);
-      $.ajax({
-        url: '/documents/edit/' + id,
-        method: 'GET',
-        success: function(data) {
-          $('#editTitle').val(data.title);
-          $('#editDescription').val(data.description);
-          $('#editModal').modal('show');
-        },
-        error: function(error) {
-          alert('Error al cargar los datos del documento.');
-        }
-      });
-    }
-
-    function deleteDocument(id) {
-      // Lógica para eliminar el documento
-      if (confirm('¿Estás seguro de que deseas eliminar este documento?')) {
-        $.ajax({
-          url: '/documents/delete/' + id,
-          method: 'DELETE',
-          success: function() {
-            loadDocuments();
-          },
-          error: function(error) {
-            alert('Error al eliminar el documento.');
+        options: {
+          responsive: true,
+          scales: {
+            x: {
+              display: true,
+              title: {
+                display: true,
+                text: 'Meses'
+              }
+            },
+            y: {
+              display: true,
+              title: {
+                display: true,
+                text: 'Valor'
+              }
+            }
           }
-        });
-      }
-    }
-
-    function shareDocument(id) {
-      // Lógica para compartir el documento
-      $('#shareDocumentForm').trigger('reset');
-      $('#shareDocumentId').val(id);
-      $('#shareDocumentModal').modal('show');
-    }
-
-    function filterDocuments() {
-      // Lógica para filtrar documentos
-      const searchQuery = $('#documentSearch').val().toLowerCase();
-      $('#documentsTableBody tr').filter(function() {
-        $(this).toggle($(this).text().toLowerCase().indexOf(searchQuery) > -1);
+        }
       });
-    }
+
+      // Gráfico de comparación de monedas
+      const ctx2 = document.getElementById('currencyComparisonChart').getContext('2d');
+      const currencyComparisonChart = new Chart(ctx2, {
+        type: 'bar',
+        data: {
+          labels: ['USD', 'EUR', 'JPY', 'GBP', 'AUD', 'CAD'],
+          datasets: [{
+            label: 'Valor Comparativo',
+            data: [1, 0.85, 110, 0.75, 1.35, 1.25], // Datos de ejemplo
+            backgroundColor: [
+              'rgba(255, 99, 132, 0.2)',
+              'rgba(54, 162, 235, 0.2)',
+              'rgba(255, 206, 86, 0.2)',
+              'rgba(75, 192, 192, 0.2)',
+              'rgba(153, 102, 255, 0.2)',
+              'rgba(255, 159, 64, 0.2)'
+            ],
+            borderColor: [
+              'rgba(255, 99, 132, 1)',
+              'rgba(54, 162, 235, 1)',
+              'rgba(255, 206, 86, 1)',
+              'rgba(75, 192, 192, 1)',
+              'rgba(153, 102, 255, 1)',
+              'rgba(255, 159, 64, 1)'
+            ],
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          scales: {
+            x: {
+              display: true,
+              title: {
+                display: true,
+                text: 'Monedas'
+              }
+            },
+            y: {
+              display: true,
+              title: {
+                display: true,
+                text: 'Valor Comparativo'
+              }
+            }
+          }
+        }
+      });
+    });
   </script>
 </body>
 </html>

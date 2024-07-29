@@ -6,8 +6,6 @@
   <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
   <link href="/public/css/styles.css" rel="stylesheet">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
   <title>Documentos Públicos</title>
   <style>
     .pagination {
@@ -23,7 +21,7 @@
   </header>
 
   <nav class="navbar navbar-expand-lg navbar-light bg-light">
-    <button class="btn btn-secondary" onclick="location.href='index.html'">Volver</button>
+    <button class="btn btn-secondary" onclick="location.href='admin.html'">Volver</button>
     <div class="ml-auto d-flex">
       <input type="search" id="documentSearch" class="form-control" placeholder="Buscar documentos">
       <button class="btn btn-secondary ml-2" onclick="filterDocuments()">Buscar</button>
@@ -38,9 +36,8 @@
           <th>ID</th>
           <th>Título</th>
           <th>Descripción</th>
-          <th>Categoría</th>
+          <th>Archivo</th>
           <th>Fecha de Publicación</th>
-          <th>Acciones</th>
         </tr>
       </thead>
       <tbody id="documentTable">
@@ -58,144 +55,57 @@
   <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
   <script>
-    let currentPage = 1;
-    const itemsPerPage = 10;
-    const documents = [
-      { _id: '1', title: 'Informe de Inflación', description: 'Análisis de la inflación en Honduras', category: 'Inflación', createdAt: '2023-01-01' },
-      { _id: '2', title: 'Reporte del PIB', description: 'Reporte trimestral del PIB de Honduras', category: 'PIB', createdAt: '2023-01-02' },
-      { _id: '3', title: 'Estadísticas Monetarias', description: 'Datos sobre las estadísticas monetarias y financieras', category: 'Monetarias', createdAt: '2023-01-03' },
-      { _id: '4', title: 'Indicadores Económicos', description: 'Indicadores económicos clave de Honduras', category: 'Indicadores', createdAt: '2023-01-04' },
-      { _id: '5', title: 'Informe de Balanza de Pagos', description: 'Análisis de la balanza de pagos de Honduras', category: 'Balanza de Pagos', createdAt: '2023-01-05' },
-      { _id: '6', title: 'Reporte de Comercio Exterior', description: 'Datos y análisis del comercio exterior de Honduras', category: 'Comercio Exterior', createdAt: '2023-01-06' },
-      { _id: '7', title: 'Informe de Reservas Internacionales', description: 'Reporte sobre las reservas internacionales de Honduras', category: 'Reservas Internacionales', createdAt: '2023-01-07' },
-      { _id: '8', title: 'Estadísticas del Mercado Laboral', description: 'Datos y análisis del mercado laboral en Honduras', category: 'Mercado Laboral', createdAt: '2023-01-08' },
-      { _id: '9', title: 'Reporte de Deuda Externa', description: 'Análisis de la deuda externa de Honduras', category: 'Deuda Externa', createdAt: '2023-01-09' },
-      { _id: '10', title: 'Informe de Política Monetaria', description: 'Estrategias y políticas monetarias implementadas en Honduras', category: 'Política Monetaria', createdAt: '2023-01-10' },
-      // Agrega más documentos si es necesario
-    ];
+    document.addEventListener('DOMContentLoaded', fetchDocuments);
 
-    document.addEventListener('DOMContentLoaded', renderDocuments);
-
-    function renderDocuments() {
-      const tableBody = document.getElementById('documentTable');
-      tableBody.innerHTML = '';
-      const start = (currentPage - 1) * itemsPerPage;
-      const end = start + itemsPerPage;
-      const paginatedDocuments = documents.slice(start, end);
-
-      paginatedDocuments.forEach(doc => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-          <td>${doc._id}</td>
-          <td>${doc.title}</td>
-          <td>${doc.description}</td>
-          <td>${doc.category}</td>
-          <td>${new Date(doc.createdAt).toLocaleDateString()}</td>
-          <td>
-            <button class="btn btn-secondary btn-custom" onclick="downloadImage('${doc._id}')"><i class="fas fa-image"></i> Imagen</button>
-            <button class="btn btn-secondary btn-custom" onclick="downloadPDF('${doc._id}')"><i class="fas fa-file-pdf"></i> PDF</button>
-          </td>
-        `;
-        tableBody.appendChild(row);
-      });
-
-      document.getElementById('currentPage').textContent = currentPage;
+    function fetchDocuments() {
+      fetch('http://localhost:3000/documents')
+        .then(response => response.json())
+        .then(documents => {
+          const tableBody = document.getElementById('documentTable');
+          tableBody.innerHTML = '';
+          documents.forEach(doc => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+              <td>${doc._id}</td>
+              <td>${doc.title}</td>
+              <td>${doc.description}</td>
+              <td><a href="${doc.filePath}" target="_blank">Ver Documento</a></td>
+              <td>${new Date(doc.createdAt).toLocaleDateString()}</td>
+            `;
+            tableBody.appendChild(row);
+          });
+        })
+        .catch(error => console.error('Error fetching documents:', error));
     }
 
     function filterDocuments() {
       const searchInput = document.getElementById('documentSearch').value.toLowerCase();
-      const filteredDocuments = documents.filter(doc => 
-        doc.title.toLowerCase().includes(searchInput) || 
-        doc.description.toLowerCase().includes(searchInput) || 
-        doc.category.toLowerCase().includes(searchInput)
-      );
-      renderFilteredDocuments(filteredDocuments);
-    }
-
-    function renderFilteredDocuments(filteredDocuments) {
-      const tableBody = document.getElementById('documentTable');
-      tableBody.innerHTML = '';
-
-      filteredDocuments.forEach(doc => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-          <td>${doc._id}</td>
-          <td>${doc.title}</td>
-          <td>${doc.description}</td>
-          <td>${doc.category}</td>
-          <td>${new Date(doc.createdAt).toLocaleDateString()}</td>
-          <td>
-            <button class="btn btn-secondary btn-custom" onclick="downloadImage('${doc._id}')"><i class="fas fa-image"></i> Imagen</button>
-            <button class="btn btn-secondary btn-custom" onclick="downloadPDF('${doc._id}')"><i class="fas fa-file-pdf"></i> PDF</button>
-          </td>
-        `;
-        tableBody.appendChild(row);
+      const tableRows = document.querySelectorAll('#documentTable tr');
+      tableRows.forEach(row => {
+        const cells = row.getElementsByTagName('td');
+        let found = false;
+        for (let i = 0; i < cells.length; i++) {
+          if (cells[i].innerText.toLowerCase().includes(searchInput)) {
+            found = true;
+            break;
+          }
+        }
+        if (found) {
+          row.style.display = '';
+        } else {
+          row.style.display = 'none';
+        }
       });
     }
 
     function prevPage() {
-      if (currentPage > 1) {
-        currentPage--;
-        renderDocuments();
-      }
+      // Implementación de la lógica de paginación
     }
 
     function nextPage() {
-      if ((currentPage * itemsPerPage) < documents.length) {
-        currentPage++;
-        renderDocuments();
-      }
-    }
-
-    function downloadImage(documentId) {
-      const doc = documents.find(d => d._id === documentId);
-      const element = document.createElement('div');
-      element.innerHTML = `
-        <h3>${doc.title}</h3>
-        <p>${doc.description}</p>
-        <p><strong>Categoría:</strong> ${doc.category}</p>
-        <p><strong>Fecha de Publicación:</strong> ${new Date(doc.createdAt).toLocaleDateString()}</p>
-      `;
-      document.body.appendChild(element);
-      html2canvas(element).then(canvas => {
-        canvas.toBlob(blob => {
-          const link = document.createElement('a');
-          link.href = URL.createObjectURL(blob);
-          link.download = `${doc.title}.png`;
-          link.click();
-          document.body.removeChild(element);
-        });
-      });
-    }
-
-    function downloadPDF(documentId) {
-      const { jsPDF } = window.jspdf;
-      const doc = documents.find(d => d._id === documentId);
-      const pdf = new jsPDF();
-
-      pdf.setFontSize(18);
-      pdf.text(doc.title, 10, 10);
-      pdf.setFontSize(12);
-      pdf.text(`Descripción: ${doc.description}`, 10, 20);
-      pdf.text(`Categoría: ${doc.category}`, 10, 30);
-      pdf.text(`Fecha de Publicación: ${new Date(doc.createdAt).toLocaleDateString()}`, 10, 40);
-      
-      // Añadir contenido adicional para llenar una hoja
-      pdf.text('Contenido adicional para llenar una hoja completa. Este es un ejemplo de cómo puedes agregar más texto.', 10, 50);
-      pdf.text('Puedes incluir gráficos, tablas, y más información relevante para el documento.', 10, 60);
-      pdf.text('Esto es solo texto de ejemplo para demostrar cómo llenar una hoja completa.', 10, 70);
-      pdf.text('Más contenido adicional. Más contenido adicional. Más contenido adicional.', 10, 80);
-      pdf.text('Más contenido adicional. Más contenido adicional. Más contenido adicional.', 10, 90);
-      pdf.text('Más contenido adicional. Más contenido adicional. Más contenido adicional.', 10, 100);
-      pdf.text('Más contenido adicional. Más contenido adicional. Más contenido adicional.', 10, 110);
-      pdf.text('Más contenido adicional. Más contenido adicional. Más contenido adicional.', 10, 120);
-      pdf.text('Más contenido adicional. Más contenido adicional. Más contenido adicional.', 10, 130);
-      pdf.text('Más contenido adicional. Más contenido adicional. Más contenido adicional.', 10, 140);
-      pdf.text('Más contenido adicional. Más contenido adicional. Más contenido adicional.', 10, 150);
-      pdf.text('Más contenido adicional. Más contenido adicional. Más contenido adicional.', 10, 160);
-
-      pdf.save(`${doc.title}.pdf`);
+      // Implementación de la lógica de paginación
     }
   </script>
 </body>
 </html>
+

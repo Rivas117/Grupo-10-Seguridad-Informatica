@@ -3,260 +3,350 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Administrar Analistas</title>
   <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+  <link href="/public/css/styles.css" rel="stylesheet">
+  <title>Gestión de Usuarios</title>
   <style>
-    body {
-      background-color: #f8f9fa;
+    .user-table {
+      margin: 20px auto;
+      width: 90%;
     }
-    .navbar {
-      margin-bottom: 20px;
+    .user-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
-    .container {
-      background: white;
-      padding: 20px;
-      border-radius: 5px;
-      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    }
-    .modal-header {
-      background-color: #007bff;
-      color: white;
-    }
-    .modal-body {
-      max-height: 300px;
-      overflow-y: auto;
+    .pagination {
+      justify-content: center;
     }
   </style>
 </head>
 <body>
   <header class="bg-dark text-white text-center py-3">
-    <h4>Administrar Analistas</h4>
+    <h4>Gestión de Usuarios</h4>
   </header>
 
   <nav class="navbar navbar-expand-lg navbar-light bg-light">
-    <div class="container">
-      <button class="btn btn-secondary ml-auto" id="logoutButton">Cerrar Sesión</button>
+    <div class="collapse navbar-collapse justify-content-between">
+      <ul class="navbar-nav">
+        <li class="nav-item">
+          <a class="nav-link" href="#" onclick="goBack()">Volver</a>
+        </li>
+      </ul>
+      <div>
+        <button type="button" class="btn btn-secondary" onclick="logout()">Cerrar Sesión</button>
+      </div>
     </div>
   </nav>
 
   <div class="container">
-    <h5 class="mb-4">Crear Cuenta de Analista</h5>
-    <form id="analyst-form">
-      <div class="form-group">
-        <label for="analyst-name">Nombre</label>
-        <input type="text" id="analyst-name" name="name" class="form-control" required>
+    <div class="user-actions mt-3">
+      <h5>Lista de Usuarios</h5>
+      <div>
+        <input type="text" id="searchUser" placeholder="Buscar usuario" class="form-control" style="display:inline-block; width:auto;">
+        <button class="btn btn-primary ml-2" onclick="showAddUserModal()">Agregar Usuario</button>
+        <button class="btn btn-secondary ml-2" onclick="exportToCSV()">Exportar a CSV</button>
       </div>
-      <div class="form-group">
-        <label for="analyst-email">Correo</label>
-        <input type="email" id="analyst-email" name="email" class="form-control" required>
-      </div>
-      <div class="form-group">
-        <label for="analyst-password">Contraseña</label>
-        <input type="password" id="analyst-password" name="password" class="form-control" required>
-      </div>
-      <button type="submit" class="btn btn-primary">Crear Cuenta</button>
-    </form>
+    </div>
 
-    <h5 class="mt-5 mb-4">Lista de Analistas</h5>
-    <table class="table table-hover mt-4">
-      <thead class="thead-light">
+    <table class="table table-striped user-table">
+      <thead>
         <tr>
-          <th>Nombre</th>
-          <th>Correo</th>
-          <th>Contraseña</th>
+          <th onclick="sortTable(0)">ID</th>
+          <th onclick="sortTable(1)">Nombre</th>
+          <th onclick="sortTable(2)">Email</th>
+          <th onclick="sortTable(3)">Rol</th>
           <th>Acciones</th>
         </tr>
       </thead>
-      <tbody id="analyst-list">
-        <!-- Aquí se llenará la lista de analistas -->
+      <tbody id="userTableBody">
+        <!-- Usuarios se cargarán aquí -->
       </tbody>
     </table>
+
+    <nav>
+      <ul class="pagination">
+        <li class="page-item"><a class="page-link" href="#" onclick="previousPage()">Anterior</a></li>
+        <li id="paginationNumbers"></li>
+        <li class="page-item"><a class="page-link" href="#" onclick="nextPage()">Siguiente</a></li>
+      </ul>
+    </nav>
   </div>
 
-  <!-- Modal de Edición -->
-  <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+  <!-- Modal para agregar/editar usuario -->
+  <div class="modal fade" id="userModal" tabindex="-1" aria-labelledby="userModalLabel" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="editModalLabel">Editar Analista</h5>
+          <h5 class="modal-title" id="userModalLabel">Agregar Usuario</h5>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
         <div class="modal-body">
-          <form id="editForm">
+          <form id="userForm">
+            <input type="hidden" id="userId">
             <div class="form-group">
-              <label for="edit-name">Nombre</label>
-              <input type="text" name="name" class="form-control" id="edit-name" required>
+              <label for="userName">Nombre</label>
+              <input type="text" class="form-control" id="userName" required>
             </div>
             <div class="form-group">
-              <label for="edit-email">Correo</label>
-              <input type="email" name="email" class="form-control" id="edit-email" required>
+              <label for="userEmail">Email</label>
+              <input type="email" class="form-control" id="userEmail" required>
             </div>
             <div class="form-group">
-              <label for="edit-password">Contraseña</label>
-              <input type="password" name="password" class="form-control" id="edit-password">
+              <label for="userRole">Rol</label>
+              <select class="form-control" id="userRole" required>
+                <option value="admin">Admin</option>
+                <option value="analyst">Analyst</option>
+              </select>
             </div>
-            <input type="hidden" id="edit-id">
-            <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+            <button type="submit" class="btn btn-primary">Guardar</button>
           </form>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Modal de Eliminación -->
-  <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+  <!-- Modal de confirmación para eliminación de usuario -->
+  <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="deleteModalLabel">Eliminar Analista</h5>
+          <h5 class="modal-title" id="confirmDeleteModalLabel">Confirmar Eliminación</h5>
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
         <div class="modal-body">
-          <p>¿Estás seguro de que deseas eliminar esta cuenta de analista?</p>
-          <input type="hidden" id="deleteId">
-          <button type="button" class="btn btn-danger" id="confirmDelete">Eliminar</button>
+          ¿Está seguro de que desea eliminar este usuario?
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-danger" id="confirmDeleteButton">Eliminar</button>
         </div>
       </div>
     </div>
   </div>
 
-  <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+  <!-- Notificaciones -->
+  <div id="notification" class="alert" style="display:none;"></div>
+
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
   <script>
-    const defaultAccounts = [
-      { id: 1, name: 'Admin User', email: 'admin@example.com', password: 'adminpassword', role: 'admin' },
-      { id: 2, name: 'Analyst User', email: 'analyst@example.com', password: 'analystpassword', role: 'analyst' }
-    ];
+    let currentPage = 1;
+    const rowsPerPage = 5;
+    let userToDelete = null;
 
-    document.addEventListener('DOMContentLoaded', () => {
-      fetchAnalysts();
-    });
+    // Redirigir a admin.html
+    function goBack() {
+      window.location.href = 'admin.html';
+    }
 
-    document.getElementById('analyst-form').addEventListener('submit', function(event) {
-      event.preventDefault();
-      const name = document.getElementById('analyst-name').value;
-      const email = document.getElementById('analyst-email').value;
-      const password = document.getElementById('analyst-password').value;
-
-      // Validar y Sanear Entradas
-      if (!validateEmail(email) || !validatePassword(password)) {
-        alert('Correo o contraseña no válidos.');
-        return;
+    // Redirigir a documentos.html
+    function logout() {
+      if (confirm('¿Seguro que desea cerrar sesión?')) {
+        window.location.href = 'documentos.html';
       }
+    }
 
-      // Implementar lógica para enviar datos al servidor
-      addAnalyst({ id: defaultAccounts.length + 1, name, email, password, role: 'analyst' });
+    // Mostrar modal para agregar usuario
+    function showAddUserModal() {
+      $('#userModalLabel').text('Agregar Usuario');
+      $('#userForm').trigger('reset');
+      $('#userId').val('');
+      $('#userModal').modal('show');
+    }
 
-      // Resetear formulario
-      this.reset();
+    // Mostrar modal para editar usuario
+    function showEditUserModal(user) {
+      $('#userModalLabel').text('Editar Usuario');
+      $('#userName').val(user.name);
+      $('#userEmail').val(user.email);
+      $('#userRole').val(user.role);
+      $('#userId').val(user.id);
+      $('#userModal').modal('show');
+    }
+
+    // Mostrar modal de confirmación para eliminar usuario
+    function showDeleteUserModal(userId) {
+      userToDelete = userId;
+      $('#confirmDeleteModal').modal('show');
+    }
+
+    // Confirmar eliminación de usuario
+    $('#confirmDeleteButton').click(function() {
+      deleteUser(userToDelete);
+      $('#confirmDeleteModal').modal('hide');
     });
 
-    function fetchAnalysts() {
-      const analystList = document.getElementById('analyst-list');
-      analystList.innerHTML = '';
+    // Eliminar usuario
+    function deleteUser(userId) {
+      const userIndex = users.findIndex(user => user.id === userId);
+      if (userIndex > -1) {
+        users.splice(userIndex, 1);
+        renderUserTable();
+        showNotification('Usuario eliminado exitosamente.', 'alert-success');
+      } else {
+        showNotification('Error al eliminar el usuario.', 'alert-danger');
+      }
+    }
 
-      defaultAccounts.filter(account => account.role === 'analyst').forEach(account => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-          <td>${account.name}</td>
-          <td>${account.email}</td>
-          <td>${account.password}</td>
-          <td>
-            <button class="btn btn-info btn-sm" onclick="editAnalyst(${account.id})">Editar</button>
-            <button class="btn btn-danger btn-sm" onclick="confirmDeleteAnalyst(${account.id})">Eliminar</button>
-          </td>
-        `;
-        analystList.appendChild(row);
+    // Buscar usuarios
+    function searchUsers() {
+      const searchValue = $('#searchUser').val().toLowerCase();
+      $('#userTableBody tr').filter(function() {
+        $(this).toggle($(this).text().toLowerCase().indexOf(searchValue) > -1);
       });
     }
 
-    function addAnalyst(analyst) {
-      defaultAccounts.push(analyst);
-      fetchAnalysts();
+    // Renderizar tabla de usuarios
+    function renderUserTable() {
+      const userTableBody = $('#userTableBody');
+      userTableBody.empty();
+      const start = (currentPage - 1) * rowsPerPage;
+      const end = start + rowsPerPage;
+      const paginatedUsers = users.slice(start, end);
+
+      paginatedUsers.forEach(user => {
+        userTableBody.append(`
+          <tr>
+            <td>${user.id}</td>
+            <td>${user.name}</td>
+            <td>${user.email}</td>
+            <td>${user.role}</td>
+            <td>
+              <button class="btn btn-info btn-sm" onclick='viewUser(${JSON.stringify(user)})'>Ver</button>
+              <button class="btn btn-warning btn-sm" onclick='showEditUserModal(${JSON.stringify(user)})'>Editar</button>
+              <button class="btn btn-danger btn-sm" onclick='showDeleteUserModal(${user.id})'>Eliminar</button>
+            </td>
+          </tr>
+        `);
+      });
+
+      updatePagination();
     }
 
-    function editAnalyst(id) {
-      const analyst = defaultAccounts.find(account => account.id === id);
-      if (analyst) {
-        document.getElementById('edit-id').value = analyst.id;
-        document.getElementById('edit-name').value = analyst.name;
-        document.getElementById('edit-email').value = analyst.email;
-        $('#editModal').modal('show');
+    // Ver detalles del usuario
+    function viewUser(user) {
+      localStorage.setItem('selectedUser', JSON.stringify(user));
+      window.location.href = 'cuenta.html';
+    }
+
+    // Ordenar tabla por columna
+    function sortTable(columnIndex) {
+      users.sort((a, b) => {
+        const columnA = Object.values(a)[columnIndex].toString().toLowerCase();
+        const columnB = Object.values(b)[columnIndex].toString().toLowerCase();
+        if (columnA < columnB) return -1;
+        if (columnA > columnB) return 1;
+        return 0;
+      });
+      renderUserTable();
+    }
+
+    // Funciones de paginación
+    function nextPage() {
+      if (currentPage * rowsPerPage < users.length) {
+        currentPage++;
+        renderUserTable();
       }
     }
 
-    document.getElementById('editForm').addEventListener('submit', function(event) {
-      event.preventDefault();
-      const id = document.getElementById('edit-id').value;
-      const name = document.getElementById('edit-name').value;
-      const email = document.getElementById('edit-email').value;
-      const password = document.getElementById('edit-password').value;
-
-      const analyst = defaultAccounts.find(account => account.id == id);
-      if (analyst) {
-        analyst.name = name;
-        analyst.email = email;
-        if (password) {
-          analyst.password = hashPassword(password);
-        }
-        fetchAnalysts();
-        $('#editModal').modal('hide');
-      }
-    });
-
-    function confirmDeleteAnalyst(id) {
-      document.getElementById('deleteId').value = id;
-      $('#deleteModal').modal('show');
-    }
-
-    document.getElementById('confirmDelete').addEventListener('click', function() {
-      const id = document.getElementById('deleteId').value;
-      deleteAnalyst(id);
-      $('#deleteModal').modal('hide');
-    });
-
-    function deleteAnalyst(id) {
-      const index = defaultAccounts.findIndex(account => account.id === id);
-      if (index !== -1) {
-        defaultAccounts.splice(index, 1);
-        fetchAnalysts();
+    function previousPage() {
+      if (currentPage > 1) {
+        currentPage--;
+        renderUserTable();
       }
     }
 
-    document.getElementById('logoutButton').addEventListener('click', function() {
-      fetch('/auth/logout', {
-        method: 'POST'
-      })
-      .then(response => {
-        if (response.ok) {
-          window.location.href = 'index.html';
+    function updatePagination() {
+      const paginationNumbers = $('#paginationNumbers');
+      paginationNumbers.empty();
+      const totalPages = Math.ceil(users.length / rowsPerPage);
+      for (let i = 1; i <= totalPages; i++) {
+        paginationNumbers.append(`<li class="page-item ${i === currentPage ? 'active' : ''}"><a class="page-link" href="#" onclick="goToPage(${i})">${i}</a></li>`);
+      }
+    }
+
+    function goToPage(page) {
+      currentPage = page;
+      renderUserTable();
+    }
+
+    // Exportar datos a CSV
+    function exportToCSV() {
+      let csvContent = "data:text/csv;charset=utf-8,";
+      csvContent += "ID,Nombre,Email,Rol\n";
+      users.forEach(user => {
+        csvContent += `${user.id},${user.name},${user.email},${user.role}\n`;
+      });
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", "usuarios.csv");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    // Mostrar notificaciones
+    function showNotification(message, alertClass) {
+      const notification = $('#notification');
+      notification.removeClass();
+      notification.addClass(`alert ${alertClass}`);
+      notification.text(message);
+      notification.show();
+      setTimeout(() => {
+        notification.hide();
+      }, 3000);
+    }
+
+    // Simular carga de usuarios
+    const users = [
+      { id: 1, name: 'John Doe', email: 'john@example.com', role: 'admin' },
+      { id: 2, name: 'Jane Doe', email: 'jane@example.com', role: 'analyst' },
+      { id: 3, name: 'Alice Smith', email: 'alice@example.com', role: 'analyst' },
+      { id: 4, name: 'Bob Johnson', email: 'bob@example.com', role: 'admin' },
+      { id: 5, name: 'Charlie Brown', email: 'charlie@example.com', role: 'analyst' },
+      { id: 6, name: 'David Wilson', email: 'david@example.com', role: 'analyst' },
+      { id: 7, name: 'Ella Davis', email: 'ella@example.com', role: 'admin' },
+      { id: 8, name: 'Frank Miller', email: 'frank@example.com', role: 'analyst' }
+    ];
+
+    $(document).ready(function() {
+      renderUserTable();
+
+      $('#userForm').submit(function(event) {
+        event.preventDefault();
+        const userId = $('#userId').val();
+        const userName = $('#userName').val();
+        const userEmail = $('#userEmail').val();
+        const userRole = $('#userRole').val();
+
+        if (userId) {
+          // Actualizar usuario existente
+          const user = users.find(user => user.id == userId);
+          user.name = userName;
+          user.email = userEmail;
+          user.role = userRole;
         } else {
-          alert('Error al cerrar sesión');
+          // Agregar nuevo usuario
+          const newUser = { id: users.length + 1, name: userName, email: userEmail, role: userRole };
+          users.push(newUser);
         }
-      })
-      .catch(err => console.log(err));
+
+        $('#userModal').modal('hide');
+        renderUserTable();
+        showNotification('Usuario guardado exitosamente.', 'alert-success');
+      });
+
+      // Añadir función de búsqueda
+      $('#searchUser').on('keyup', searchUsers);
     });
-
-    function validateEmail(email) {
-      const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      return re.test(String(email).toLowerCase());
-    }
-
-    function validatePassword(password) {
-      // Implementar lógica de validación de contraseña (mínimo 8 caracteres, etc.)
-      return password.length >= 8;
-    }
-
-    function hashPassword(password) {
-      // Implementar lógica de hashing seguro (por ejemplo, bcrypt)
-      return password; // Placeholder, reemplazar con hash real
-    }
   </script>
 </body>
 </html>

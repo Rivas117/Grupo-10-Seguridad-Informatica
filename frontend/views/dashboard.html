@@ -32,7 +32,10 @@
           <a class="nav-link" href="#" onclick="showSection('graficosSection')">Gráficos Económicos</a>
         </li>
       </ul>
-      <button type="button" class="btn btn-secondary" onclick="logout()">Cerrar Sesión</button>
+      <div>
+        <button type="button" class="btn btn-secondary" onclick="goBack()">Volver</button>
+        <button type="button" class="btn btn-secondary" onclick="logout()">Cerrar Sesión</button>
+      </div>
     </div>
   </nav>
 
@@ -67,9 +70,12 @@
 
     function logout() {
       if (confirm('¿Seguro que desea cerrar sesión?')) {
-        // Implement logout functionality here
-        alert('Cerrar sesión');
+        window.location.href = 'documentos.html';
       }
+    }
+
+    function goBack() {
+      window.location.href = 'admin.html';
     }
 
     function downloadReport() {
