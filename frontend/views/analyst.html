@@ -73,7 +73,7 @@
 
   <nav class="navbar navbar-expand-lg navbar-light bg-light">
     <div class="container">
-      <button class="btn btn-secondary ml-auto" onclick="location.href='/auth/logout'">Cerrar Sesión</button>
+      <button class="btn btn-secondary ml-auto" id="logoutButton">Cerrar Sesión</button>
     </div>
   </nav>
 
@@ -224,6 +224,15 @@
         }
       });
     });
+
+    // Cerrar sesión y redirigir a documentos.html
+    document.getElementById('logoutButton').addEventListener('click', function() {
+      localStorage.removeItem('authenticated');
+      window.location.href = 'documentos.html';
+    });
   </script>
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>

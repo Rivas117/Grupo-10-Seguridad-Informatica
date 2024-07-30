@@ -3,7 +3,8 @@ const router = express.Router();
 const multer = require('multer');
 const path = require('path');
 const { ensureAuthenticated } = require('../config/auth');
-const Document = require('../models/Document');
+const Document = require('../models/documentModel');
+const documentoController = require('../controllers/documentoController');
 
 // Configurar motor de almacenamiento
 const storage = multer.diskStorage({
@@ -25,9 +26,10 @@ router.post('/upload', ensureAuthenticated, (req, res) => {
       res.status(500).send('Error al subir el archivo.');
     } else {
       const nuevoDocumento = new Document({
-        titulo: req.body.titulo,
-        descripcion: req.body.descripcion,
-        rutaArchivo: req.file.path
+        title: req.body.title,
+        description: req.body.description,
+        category: req.body.category,
+        file: req.file.path
       });
       nuevoDocumento.save()
         .then(() => res.redirect('/documentos'))
@@ -37,11 +39,7 @@ router.post('/upload', ensureAuthenticated, (req, res) => {
 });
 
 // Ruta para obtener todos los documentos
-router.get('/', ensureAuthenticated, (req, res) => {
-  Document.find()
-    .then(documents => res.json(documents))
-    .catch(err => res.status(500).send('Error al obtener los documentos.'));
-});
+router.get('/', ensureAuthenticated, documentoController.getDocuments);
 
 // Ruta para obtener un documento por ID
 router.get('/:id', ensureAuthenticated, (req, res) => {
@@ -51,20 +49,18 @@ router.get('/:id', ensureAuthenticated, (req, res) => {
 });
 
 // Ruta para actualizar un documento
-router.put('/:id', ensureAuthenticated, (req, res) => {
-  Document.findByIdAndUpdate(req.params.id, {
-    titulo: req.body.titulo,
-    descripcion: req.body.descripcion
-  }, { new: true })
-    .then(document => res.json(document))
-    .catch(err => res.status(500).send('Error al actualizar el documento.'));
-});
+router.put('/:id', ensureAuthenticated, documentoController.updateDocument);
 
 // Ruta para eliminar un documento
-router.delete('/:id', ensureAuthenticated, (req, res) => {
-  Document.findByIdAndDelete(req.params.id)
-    .then(() => res.json({ message: 'Documento eliminado correctamente.' }))
-    .catch(err => res.status(500).send('Error al eliminar el documento.'));
-});
+router.delete('/:id', ensureAuthenticated, documentoController.deleteDocument);
+
+// Ruta para descargar un documento como imagen
+router.get('/:id/download-image', ensureAuthenticated, documentoController.downloadAsImage);
+
+// Ruta para descargar un documento como PDF
+router.get('/:id/download-pdf', ensureAuthenticated, documentoController.downloadAsPDF);
+
+// Ruta para descargar un documento como DOC
+router.get('/:id/download-doc', ensureAuthenticated, documentoController.downloadAsDoc);
 
 module.exports = router;

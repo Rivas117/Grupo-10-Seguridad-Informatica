@@ -164,10 +164,10 @@
     // Mostrar modal para editar usuario
     function showEditUserModal(user) {
       $('#userModalLabel').text('Editar Usuario');
-      $('#userName').val(user.name);
+      $('#userName').val(user.nombre);
       $('#userEmail').val(user.email);
-      $('#userRole').val(user.role);
-      $('#userId').val(user.id);
+      $('#userRole').val(user.rol_usuario[0].toLowerCase());
+      $('#userId').val(user.id_usuario);
       $('#userModal').modal('show');
     }
 
@@ -185,7 +185,7 @@
 
     // Eliminar usuario
     function deleteUser(userId) {
-      const userIndex = users.findIndex(user => user.id === userId);
+      const userIndex = users.findIndex(user => user.id_usuario === userId);
       if (userIndex > -1) {
         users.splice(userIndex, 1);
         renderUserTable();
@@ -214,14 +214,14 @@
       paginatedUsers.forEach(user => {
         userTableBody.append(`
           <tr>
-            <td>${user.id}</td>
-            <td>${user.name}</td>
+            <td>${user.id_usuario}</td>
+            <td>${user.nombre}</td>
             <td>${user.email}</td>
-            <td>${user.role}</td>
+            <td>${user.rol_usuario.join(', ')}</td>
             <td>
               <button class="btn btn-info btn-sm" onclick='viewUser(${JSON.stringify(user)})'>Ver</button>
               <button class="btn btn-warning btn-sm" onclick='showEditUserModal(${JSON.stringify(user)})'>Editar</button>
-              <button class="btn btn-danger btn-sm" onclick='showDeleteUserModal(${user.id})'>Eliminar</button>
+              <button class="btn btn-danger btn-sm" onclick='showDeleteUserModal(${user.id_usuario})'>Eliminar</button>
             </td>
           </tr>
         `);
@@ -282,7 +282,7 @@
       let csvContent = "data:text/csv;charset=utf-8,";
       csvContent += "ID,Nombre,Email,Rol\n";
       users.forEach(user => {
-        csvContent += `${user.id},${user.name},${user.email},${user.role}\n`;
+        csvContent += `${user.id_usuario},${user.nombre},${user.email},${user.rol_usuario.join(', ')}\n`;
       });
       const encodedUri = encodeURI(csvContent);
       const link = document.createElement("a");
@@ -307,14 +307,26 @@
 
     // Simular carga de usuarios
     const users = [
-      { id: 1, name: 'John Doe', email: 'john@example.com', role: 'admin' },
-      { id: 2, name: 'Jane Doe', email: 'jane@example.com', role: 'analyst' },
-      { id: 3, name: 'Alice Smith', email: 'alice@example.com', role: 'analyst' },
-      { id: 4, name: 'Bob Johnson', email: 'bob@example.com', role: 'admin' },
-      { id: 5, name: 'Charlie Brown', email: 'charlie@example.com', role: 'analyst' },
-      { id: 6, name: 'David Wilson', email: 'david@example.com', role: 'analyst' },
-      { id: 7, name: 'Ella Davis', email: 'ella@example.com', role: 'admin' },
-      { id: 8, name: 'Frank Miller', email: 'frank@example.com', role: 'analyst' }
+      {
+        "_id": { "$oid": "6695f4398f04e8627c9a88b8" },
+        "id_usuario": 1,
+        "rol_usuario": ["Administrador"],
+        "nombre": "Luis Fernando Rivas Godoy",
+        "email": "Luif_Rivasg@Unicah.edu",
+        "contrasena": "$2y$10$gE0.R8b7nV6B1VZFPQ.h8eTklXJQoW8Oqjb7q6J.YzT/qWfgGTSje",
+        "fecha_creacion": { "$date": "2024-06-27T00:00:00.000Z" },
+        "estado": true
+      },
+      {
+        "_id": { "$oid": "6695f45f8f04e8627c9a88bb" },
+        "id_usuario": 2,
+        "rol_usuario": ["Analista"],
+        "nombre": "Mary Alvarado",
+        "email": "MaryG_Alva@Unicah.edu",
+        "contrasena": "$2y$10$XtWlk5UQK8YkQQn/ft2s.Ow2um/a.ZKN2rD3HlUkHp6VYBRT6ni7",
+        "fecha_creacion": { "$date": "2024-07-27T00:00:00.000Z" },
+        "estado": true
+      }
     ];
 
     $(document).ready(function() {
@@ -329,13 +341,20 @@
 
         if (userId) {
           // Actualizar usuario existente
-          const user = users.find(user => user.id == userId);
-          user.name = userName;
+          const user = users.find(user => user.id_usuario == userId);
+          user.nombre = userName;
           user.email = userEmail;
-          user.role = userRole;
+          user.rol_usuario = [userRole.charAt(0).toUpperCase() + userRole.slice(1)];
         } else {
           // Agregar nuevo usuario
-          const newUser = { id: users.length + 1, name: userName, email: userEmail, role: userRole };
+          const newUser = {
+            id_usuario: users.length + 1,
+            nombre: userName,
+            email: userEmail,
+            rol_usuario: [userRole.charAt(0).toUpperCase() + userRole.slice(1)],
+            fecha_creacion: { "$date": new Date().toISOString() },
+            estado: true
+          };
           users.push(newUser);
         }
 
